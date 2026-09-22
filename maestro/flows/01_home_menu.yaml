@@ -1,0 +1,122 @@
+# ============================================================
+# TC-APP-001 — Jelajah Menu Utama MiLab2
+#
+# TUJUAN
+#   Memastikan alur navigasi utama aplikasi MiLab2 berjalan:
+#   dari Home, buka Our Product, lanjut ke My Class, lalu
+#   buka Download Task sampai proses download modul.
+#
+# PRASYARAT
+#   - Emulator Android menyala (cek: adb devices)
+#   - Aplikasi MiLab2 sudah terpasang. Build dulu dari source-nya:
+#       cd D:\AI\MiLab\my_lab
+#       flutter build apk --debug
+#     lalu install APK hasil build:
+#       adb install -r build\app\outputs\flutter-apk\app-debug.apk
+#     PENTING: pakai APK hasil build terbaru. APK rilis lama tidak
+#     memuat Semantics identifier, sehingga `tapOn: {id: ...}` gagal.
+#   - Maestro CLI tersedia
+#
+# DATA UJI
+#   Akun & data sudah terisi otomatis di dalam aplikasi (mode demo),
+#   jadi tidak ada input manual yang diperlukan.
+#
+# EKSPEKTASI
+#   Semua langkah di bawah berstatus ✅ dan flow berakhir kembali
+#   di halaman Home.
+#
+# CARA JALANKAN
+#   maestro test maestro\flows\01_home_menu.yaml
+# ============================================================
+
+appId: com.example.Milab2
+name: "TC-APP-001 Jelajah Menu Utama MiLab2"
+tags:
+  - smoke
+---
+# Mulai dari kondisi bersih, biar hasilnya sama setiap kali dijalankan
+- launchApp:
+    clearState: true
+
+# ---------- 1. Halaman Home ----------
+# PENTING: tunggu Home benar-benar tampil sebelum menyentuh apa pun.
+# `tapOn` tidak menunggu aplikasi selesai loading. Kalau langsung tap
+# setelah launchApp, tap-nya mendarat di splash screen dan flow gagal.
+- assertVisible: "Hi, Faizallll"
+- assertVisible: "Menu Utama"
+- assertVisible: "My Class"
+- assertVisible: "Download Task"
+- assertVisible: "Schedule"
+- assertVisible: "Other Services"
+
+# ---------- 2. Our Product ----------
+# Ikon "View All" tidak punya teks, jadi ditap pakai identifier yang
+# sudah dipasang di source code (Semantics(identifier: 'home_view_all')).
+- tapOn:
+    id: "home_view_all"
+- assertVisible: "Our Product"
+
+# Teks kartu produk digabung Flutter jadi satu string, jadi pakai regex
+- assertVisible: ".*SIMUTU Lab.*"
+- tapOn: ".*SIMUTU Lab.*"
+
+# Detail produk
+- assertVisible: ".*About This Service.*"
+- assertVisible: "24/7"
+- scroll
+- assertVisible: "Get Started"
+- back
+- assertVisible: "Our Product"
+
+# Info produk lewat ikon "i" di AppBar
+- tapOn:
+    id: "our_product_info"
+- assertVisible: ".*About MiLab.*"
+- back
+- assertVisible: "Our Product"
+- back
+- assertVisible: "Hi, Faizallll"
+
+# ---------- 3. My Class ----------
+- tapOn: "My Class"
+- assertVisible: "My Classes"
+- assertVisible: ".*Pemrograman Mobile E.*"
+- tapOn: ".*Pemrograman Mobile E.*"
+
+# Detail kelas: nilai akhir & komponen penilaian
+- assertVisible: ".*Final Grade.*"
+- assertVisible: ".*Modul 1.*"
+- assertVisible: "Grade: A"
+
+- tapOn: "Check Presence"
+- assertVisible: ".*Presence 1.*"
+- back
+- back
+- back
+- assertVisible: "Hi, Faizallll"
+
+# ---------- 4. Download Task ----------
+- tapOn: "Download Task"
+- assertVisible: "Download Task"
+- tapOn: ".*Pemrograman Mobile E.*"
+
+# Daftar modul yang bisa diunduh
+- assertVisible: ".*Course Materials.*"
+- assertVisible: "6 Modules Available"
+- assertVisible: ".*Module 1.*"
+- tapOn: ".*Module 1.*"
+
+# Isi modul 1
+- assertVisible: ".*Module 1 Files.*"
+- assertVisible: ".*Module Guide.*"
+- assertVisible: ".*Practice Files.*"
+- assertVisible: ".*Additional Resources.*"
+
+# Proses download salah satu berkas
+- tapOn: ".*Practice Files.*"
+- assertVisible: ".*Downloading Files for Module 1.*"
+
+# Kembali ke Home
+- back
+- back
+- assertVisible: "Hi, Faizallll"

@@ -1,0 +1,17 @@
+{
+  "name": "automated",
+  "version": "1.0.0",
+  "description": "Automated testing project (Cypress + Maestro)",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:pub": "cypress run --spec cypress/e2e/tc-pub-001.cy.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cypress": "^16.0.0"
+  }
+}

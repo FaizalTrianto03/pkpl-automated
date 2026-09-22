@@ -1,0 +1,45 @@
+# ============================================================
+# TC-APP-000 — Cek Koneksi Maestro ke Emulator
+#
+# TUJUAN
+#   Memastikan emulator Android + Maestro CLI sudah terhubung
+#   dengan benar SEBELUM menjalankan flow aplikasi sungguhan.
+#   Sengaja pakai aplikasi Settings bawaan Android supaya tidak
+#   bergantung pada APK apa pun.
+#
+# PRASYARAT
+#   - Emulator Android menyala (cek: adb devices)
+#   - Maestro CLI tersedia
+#
+# EKSPEKTASI
+#   Semua langkah berstatus ✅.
+#
+# CARA JALANKAN
+#   maestro test maestro\cek-koneksi.yaml
+#
+# Kalau flow ini GAGAL, jangan lanjut ke flow aplikasi dulu —
+# yang bermasalah adalah setup emulator/Maestro, bukan aplikasinya.
+# ============================================================
+
+appId: com.android.settings
+name: "TC-APP-000 Cek Koneksi Maestro ke Emulator"
+---
+# Reset dulu biar selalu mulai dari kondisi yang sama
+- launchApp:
+    clearState: true
+
+# Halaman utama Settings tampil
+- assertVisible: "Settings"
+- assertVisible: "Network & internet"
+
+# Masuk ke halaman Network & internet
+- tapOn: "Network & internet"
+
+# Cek menu khas halaman ini.
+# CATATAN: judul halaman di Android kadang tidak masuk ke UI hierarchy,
+# jadi yang dicek isi halamannya (Internet, SIMs), bukan judulnya.
+- assertVisible: "Internet"
+- assertVisible: "SIMs"
+
+# Balik ke halaman utama
+- back
