@@ -6,7 +6,9 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "test:pub": "cypress run --spec cypress/e2e/tc-pub-001.cy.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test:app": "maestro test maestro/flows/",
+    "test:all": "npm run test:pub && npm run test:app",
+    "test": "echo \"Pilih: npm run test:pub (Cypress/web) atau npm run test:app (Maestro/mobile)\""
   },
   "keywords": [],
   "author": "",

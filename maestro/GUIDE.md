@@ -28,12 +28,37 @@ dari atas ke bawah.
 
 ```
 maestro/
-├── GUIDE.md              ← dokumen ini
-├── config.yaml           ← appId default + daftar flow
-├── cek-koneksi.yaml      ← TC-APP-000: cek emulator & Maestro (pakai Settings)
+├── GUIDE.md                    ← dokumen ini
+├── config.yaml                 ← appId default + daftar flow
 └── flows/
-    └── 01_home_menu.yaml ← TC-APP-001: contoh test case aplikasi MiLab2
+    ├── 00_cek_koneksi.yaml     ← TC-APP-000: cek emulator & Maestro (pakai Settings)
+    └── 01_home_menu.yaml       ← TC-APP-001: contoh test case aplikasi MiLab2
 ```
+
+> **Soal nama folder — sering bikin bingung, jadi dibahas di sini.**
+>
+> Konvensi resmi Maestro adalah **`.maestro/`** (pakai titik di depan), di situ biasanya
+> ditaruh `config.yaml`. Tapi nama folder itu **bukan keharusan** — yang wajib hanya:
+>
+> 1. ada file bernama persis **`config.yaml`** di folder yang ditunjuk ke Maestro,
+> 2. file flow `.yaml` berada di lokasi yang tercakup pola `flows:` di config.
+>
+> Repo ini sengaja memakai **`maestro/`** (tanpa titik) supaya **sejajar dengan `cypress/`**.
+> Jadi struktur repo terlihat simetris: `cypress/` untuk web, `maestro/` untuk mobile.
+
+### Kenapa semua flow harus ada di dalam `flows/`
+
+`maestro/config.yaml` berisi:
+
+```yaml
+flows:
+  - "flows/**"
+```
+
+Pola `flows/**` artinya **"semua file di dalam folder `flows/`, sampai ke sub-folder"**.
+File yang diletakkan langsung di `maestro/` (satu level di atas `flows/`) **tidak akan
+terdeteksi** saat menjalankan `maestro test maestro\`. Pelajaran praktisnya: **selalu
+simpan flow di dalam `flows/`.**
 
 ---
 
@@ -270,11 +295,38 @@ Selalu pastikan halaman sudah tampil dulu:
 ### 9.4 Judul halaman Android kadang tidak terdeteksi
 
 Di layar Settings Android, judul halaman tidak selalu masuk ke UI hierarchy. Karena itu
-`cek-koneksi.yaml` memverifikasi **isi** halaman (`"Internet"`, `"SIMs"`) alih-alih
-judulnya (`"Network & internet"` sebagai header).
+`00_cek_koneksi.yaml` (TC-APP-000) memverifikasi **isi** halaman (`"Internet"`, `"SIMs"`)
+alih-alih judulnya (`"Network & internet"` sebagai header).
 
 Prinsipnya: kalau sebuah assertion gagal padahal secara visual teksnya ada, coba periksa
 UI hierarchy di folder debug Maestro — mungkin elemen itu memang tidak ter-ekspos.
+
+### 9.5 Tutup aplikasi di akhir flow — jangan tinggalkan state
+
+Ini pelajaran yang mahal: flow yang **berhasil** pun bisa merusak flow **berikutnya**.
+
+Kasus nyatanya: `00_cek_koneksi.yaml` membuka aplikasi **Settings**, lalu berhenti.
+Kalau Settings dibiarkan hidup, Android kadang memunculkan dialog sistem
+**"Application Not Responding" (ANR)** untuk proses Settings tersebut. Dialog itu
+**mengambil alih fokus layar**, sehingga flow berikutnya (`01_home_menu.yaml`) gagal di
+langkah pertama:
+
+```
+Assertion is false: "Hi, Faizallll" is visible
+```
+
+Padahal penyebabnya **bukan** aplikasi MiLab2, melainkan sisa proses aplikasi lain.
+
+Solusinya: **selalu bersihkan di akhir flow.**
+
+```yaml
+- stopApp            # matikan aplikasi yang tadi dibuka
+- pressKey: Home     # pastikan layar balik ke launcher
+```
+
+> **Ini juga penyebab utama "kadang jalan, kadang gagal".** Kalau flow kamu lewat
+> (pass) saat dijalankan sendiri tapi gagal saat dijalankan bersama flow lain, hampir
+> pasti penyebabnya state yang tertinggal dari flow sebelumnya — bukan selector kamu.
 
 ---
 
@@ -287,6 +339,8 @@ UI hierarchy di folder debug Maestro — mungkin elemen itu memang tidak ter-eks
 | `No devices found` | Emulator mati | Nyalakan emulator |
 | Install gagal: signature | Versi lama masih terpasang | `adb uninstall com.example.Milab2` lalu install ulang |
 | Perilaku beda tiap run | State aplikasi tertinggal | Pakai `launchApp: { clearState: true }` |
+| Lulus sendiri, gagal saat sekaligus | Sisa state flow sebelumnya (mis. dialog ANR dari aplikasi lain) | Tutup aplikasi di akhir flow: `stopApp` + `pressKey: Home` (lihat 9.5) |
+| Layar ketutup dialog "Application Not Responding" | Proses aplikasi lama masih hidup | Tap "Close app", lalu tambahkan `stopApp` di akhir flow sebelumnya |
 | Teks jelas ada tapi tidak ketemu | Teks tergabung dengan elemen lain | Pakai regex `.*teks.*` |
 
 ---
@@ -305,20 +359,27 @@ UI hierarchy di folder debug Maestro — mungkin elemen itu memang tidak ter-eks
 
 ## 12. Hubungan dengan `npm run`
 
-Perhatikan: Maestro **bukan** tool Node.js, jadi tidak dijalankan lewat `npm run`. Di
-`package.json` hanya ada script untuk Cypress.
+Maestro **bukan** tool Node.js, jadi secara teknis tidak bergantung pada `npm`. Tapi kalau
+Maestro CLI sudah masuk PATH, kita bisa memanggilnya lewat script `npm run` supaya
+**sejajar** dengan Cypress — satu gaya perintah untuk web dan mobile.
 
-```powershell
-npm run test:pub          # → Cypress  (web)
-npx maestro test ...      # → Maestro  (mobile)
-```
-
-Kalau nanti Maestro sudah masuk PATH, kita bisa menambahkan sendiri script-nya di
-`package.json` supaya sejajar dengan Cypress:
+`package.json` di repo ini sudah menyediakannya:
 
 ```json
-"test:app": "maestro test maestro/flows/"
+"test:pub":  "cypress run --spec cypress/e2e/tc-pub-001.cy.js",
+"test:app":  "maestro test maestro/flows/",
+"test:all":  "npm run test:pub && npm run test:app"
 ```
+
+```powershell
+npm run test:pub     # → Cypress (web)
+npm run test:app     # → Maestro (mobile)
+npm run test:all     # → keduanya
+```
+
+> **Prasyarat:** perintah `maestro` harus bisa dipanggil langsung. Kalau belum, jalankan
+> dengan path lengkap: `& "C:\maestro\maestro\bin\maestro.bat" test maestro\flows\`.
+> Lihat bagian 3 untuk cara menambahkannya ke PATH.
 
 ---
 

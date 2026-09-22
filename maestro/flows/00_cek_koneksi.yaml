@@ -15,7 +15,7 @@
 #   Semua langkah berstatus ✅.
 #
 # CARA JALANKAN
-#   maestro test maestro\cek-koneksi.yaml
+#   & "C:\maestro\maestro\bin\maestro.bat" test maestro\flows\00_cek_koneksi.yaml
 #
 # Kalau flow ini GAGAL, jangan lanjut ke flow aplikasi dulu —
 # yang bermasalah adalah setup emulator/Maestro, bukan aplikasinya.
@@ -43,3 +43,17 @@ name: "TC-APP-000 Cek Koneksi Maestro ke Emulator"
 
 # Balik ke halaman utama
 - back
+
+# ---------- BERSIH-BERSIH ----------
+# PENTING: tutup aplikasi Settings di akhir flow.
+#
+# Kalau Settings dibiarkan terbuka, kadang Android memunculkan dialog
+# sistem "Application Not Responding" (ANR) untuk proses Settings yang
+# masih hidup. Dialog itu MENGAMBIL ALIH FOKUS LAYAR, sehingga flow
+# berikutnya (TC-APP-001) gagal di langkah pertama karena Home MiLab2
+# tidak pernah terlihat.
+#
+# `stopApp` mematikan proses Settings, `pressKey: Home` memastikan
+# layar kembali ke launcher. Dengan ini tiap flow selalu mulai bersih.
+- stopApp
+- pressKey: Home
