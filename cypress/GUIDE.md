@@ -1,10 +1,9 @@
 # Panduan Cypress — Automation Web
 
-Folder ini berisi automation test **aplikasi web** pakai [Cypress](https://www.cypress.io/).
-Cypress adalah tool UI automation untuk web: test ditulis pakai **JavaScript**, dijalankan
-langsung di dalam browser.
+Automation test **aplikasi web** pakai [Cypress](https://www.cypress.io/). Test ditulis pakai
+**JavaScript** dan dijalankan langsung di dalam browser.
 
-Untuk sisi mobile, padanannya ada di [`../maestro/GUIDE.md`](../maestro/GUIDE.md).
+Padanan untuk mobile ada di [`../maestro/GUIDE.md`](../maestro/GUIDE.md).
 
 ---
 
@@ -91,27 +90,24 @@ Bisa juga memanggil lewat `npx` langsung:
 npx cypress run --spec cypress/e2e/tc-pub-001.cy.js --browser chrome
 ```
 
-> 💡 **Waktu belajar, pakai `cypress:open`.** Kita bisa melihat setiap perintah berjalan,
-> meng-klik langkah untuk melihat kondisi DOM saat itu, dan langsung tahu selector mana yang
-> gagal. `cypress:run` lebih cocok kalau test sudah stabil dan ingin dijalankan massal.
+> **Saat belajar pakai `cypress:open`.** Tiap perintah bisa dilihat berjalan, langkahnya bisa
+> diklik untuk melihat kondisi DOM saat itu, jadi selector yang gagal langsung kelihatan.
+> `cypress:run` untuk test yang sudah stabil dan mau dijalankan massal.
 
 ---
 
 ## 5. Contoh Test Case: `tc-pub-001.cy.js`
 
-File ini adalah contoh lengkap yang **sudah berjalan dan lulus** (6 test). Isinya menguji
-portal publik Penilaian MPPL: mahasiswa membuka portal, mencari dirinya pakai NIM, lalu
-menelusuri profil, kelompok, nilai, sampai halaman sanksi.
+6 test, semuanya lulus. Alurnya: mahasiswa buka portal, cari dirinya pakai NIM, lalu
+menelusuri profil → kelompok → nilai → halaman sanksi.
 
-> ⚠️ **Perhatian:** test ini menembak ke server sungguhan
-> (`https://mppl.codrihub.my.id/`), bukan server tiruan. Kalau portalnya sedang mati,
-> semua test akan gagal — tapi itu **bukan** kesalahan script-nya. Cek dulu portalnya masih
-> bisa dibuka di browser sebelum menduga ada bug:
+> **Penting:** test ini menembak server sungguhan (`https://mppl.codrihub.my.id/`), bukan
+> server tiruan. Kalau portalnya mati, semua test gagal — itu bukan bug script-nya. Cek dulu
+> portalnya masih hidup sebelum menduga ada bug:
 > ```powershell
 > Invoke-WebRequest -Uri "https://mppl.codrihub.my.id/" -UseBasicParsing | Select-Object StatusCode
 > ```
-> Bandingkan dengan repo latihan di bagian 6, yang memakai `saucedemo.com` — situs
-> latihan publik yang selalu hidup, jadi lebih enak buat belajar tanpa gangguan.
+> Repo latihan di bagian 6 memakai `saucedemo.com`, situs latihan publik yang selalu hidup.
 
 ### 5.1 Bagian atas — konstanta
 
@@ -122,8 +118,8 @@ const NAMA = 'Mahasiswa 202210370311015'
 const KELOMPOK_AKTIF = 'Contoh Kelompok 4'
 ```
 
-Semua nilai yang dipakai berulang dikumpulkan di atas. Jadi kalau data uji berubah, kita
-cuma perlu mengubah **satu tempat**, bukan mencari-cari di seluruh file.
+Semua nilai yang dipakai berulang dikumpulkan di atas — kalau data uji berubah, cukup edit
+satu tempat.
 
 ### 5.2 Kerangka test
 
@@ -142,9 +138,7 @@ describe('TC-PUB-001 — Portal Publik Praktikan', () => {
 })
 ```
 
-- `describe` = nama kelompok test
-- `beforeEach` = jalan sebelum **setiap** `it` (di sini mengatur ukuran layar)
-- `it` = satu skenario test
+- `describe` = kelompok test, `beforeEach` = jalan sebelum tiap `it`, `it` = satu skenario test
 
 `cy.viewport(1440, 900)` penting supaya layout selalu sama di semua mesin — kalau ukuran
 layar berbeda, elemen bisa berpindah tempat dan test jadi tidak konsisten.
@@ -155,8 +149,8 @@ layar berbeda, elemen bisa berpindah tempat dan test jadi tidak konsisten.
 ```js
 cy.visit(BASE_URL)
 ```
-Karena `baseUrl` belum di-set di `cypress.config.js`, alamat lengkap ditulis langsung.
-Alternatifnya, set `baseUrl` di config (lihat bagian 8) supaya cukup menulis `cy.visit('/')`.
+Karena `baseUrl` belum di-set di `cypress.config.js`, alamat lengkap ditulis langsung. Kalau
+di-set (bagian 8), cukup `cy.visit('/')`.
 
 **Mencari elemen:**
 ```js
@@ -165,10 +159,10 @@ cy.contains(NAMA)                      // cari lewat teks
 cy.contains('h3', KELOMPOK_AKTIF)      // cari <h3> yang berisi teks tertentu
 ```
 
-**Berkomunikasi dengan elemen:**
+**Berinteraksi dengan elemen:**
 ```js
-cy.get('input[placeholder*="NIM"]').type(`${NIM}{enter}`)   // ketik lalu Enter
-cy.contains(NAMA).click()                                    // klik
+cy.get('input[placeholder*="NIM"]').type(`${NIM}{enter}`)   // {enter} = tekan Enter
+cy.contains(NAMA).click()
 ```
 
 **Memeriksa hasil:**
@@ -181,9 +175,9 @@ cy.contains('Nilai Akhir:').parent().should('contain', 'B+')
 
 ### 5.4 Pelajaran dari test ini
 
-**Menelusuri hubungan antar-elemen.** Di test 4, tombol "Lihat Detail" tidak bisa dicari
-langsung karena ada beberapa kelompok, masing-masing punya tombol serupa. Solusinya:
-berangkat dari judul kelompoknya, naik ke elemen induk, baru cari tombolnya.
+**Menelusuri hubungan antar-elemen.** Di test 4 tombol "Lihat Detail" tidak bisa dicari
+langsung — ada beberapa kelompok, masing-masing punya tombol serupa. Berangkat dari judul
+kelompoknya, naik ke elemen induk, baru cari tombolnya.
 
 ```js
 cy.contains('h3', KELOMPOK_AKTIF)
@@ -192,14 +186,14 @@ cy.contains('h3', KELOMPOK_AKTIF)
   .click()
 ```
 
-**Pakai tag HTML kalau teks muncul di beberapa tempat.** `cy.contains('PROJECT INITIATION')`
-bisa menangkap elemen tersembunyi. Dengan menyebut tagnya, pencarian jadi lebih tepat:
+**Pakai tag HTML kalau teksnya muncul di beberapa tempat.** `cy.contains('PROJECT INITIATION')`
+bisa menangkap elemen tersembunyi. Menyebut tagnya membuat pencarian lebih tepat:
 
 ```js
 cy.contains('h3', 'PROJECT INITIATION & JIRA SETUP').should('be.visible')
 ```
 
-**Perhatikan hierarki teks.** Kadang nilai yang dicari bukan elemen tersendiri, tapi bagian
+**Perhatikan hierarki teks.** Kadang nilai yang dicari bukan elemen sendiri, tapi bagian
 dari elemen induk:
 
 ```js
@@ -210,21 +204,16 @@ cy.contains('Nilai Akhir:').parent().should('contain', 'B+')
 
 ## 6. Materi Latihan Tambahan
 
-Kalau ingin lebih banyak contoh, ada dua sumber bagus:
-
 ### 6.1 Video tutorial
 
-**https://youtu.be/vk6zK_kuYxU** — membahas dasar automation web pakai Cypress.
+**https://youtu.be/vk6zK_kuYxU** — dasar automation web pakai Cypress.
 
 ### 6.2 Repo contoh: `automation-web-cypress`
 
 **https://github.com/lidyanwr/automation-web-cypress.git**
 
-Repo ini berisi latihan dengan SUT berupa situs latihan publik
-**[saucedemo.com](https://www.saucedemo.com/)** — situs yang memang dibuat untuk berlatih
-automation, jadi aman dipakai siapa saja.
-
-Yang bisa dipelajari dari repo tersebut:
+SUT-nya **[saucedemo.com](https://www.saucedemo.com/)** — situs latihan publik yang memang
+dibuat untuk berlatih automation.
 
 **a. Mengisi form login dan checkout** (`cypress/e2e/Latihan.cy.js`)
 ```js

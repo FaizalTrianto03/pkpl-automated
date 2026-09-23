@@ -17,7 +17,7 @@ const KELOMPOK_NONAKTIF = 'Contoh Kelompok 1'
 
 describe('TC-PUB-001 — Portal Publik Praktikan', () => {
   beforeEach(() => {
-    // Ukuran layar standar biar layout konsisten di semua test
+    // Ukuran tetap supaya layout tidak bergeser antar mesin
     cy.viewport(1440, 900)
   })
 
@@ -32,14 +32,12 @@ describe('TC-PUB-001 — Portal Publik Praktikan', () => {
     cy.visit(BASE_URL)
     cy.get('input[placeholder*="NIM"]').type(`${NIM}{enter}`)
 
-    // Hasil pencarian tampil sebagai dropdown
+    // Hasil pencarian muncul sebagai dropdown
     cy.contains(NIM).should('be.visible')
     cy.contains(NAMA).should('be.visible')
 
-    // Klik hasilnya → masuk ke halaman profil praktikan
     cy.contains(NAMA).click()
 
-    // Profil: NIM tampil sebagai judul halaman
     cy.url().should('include', '/praktikan/')
     cy.get('h1').should('contain', NAMA)
     cy.get('body').should('contain', NIM)
@@ -52,17 +50,14 @@ describe('TC-PUB-001 — Portal Publik Praktikan', () => {
 
     cy.get('h1').should('contain', NAMA)
 
-    // Ringkasan profil: status, total kelompok, kelompok aktif/nonaktif
     cy.contains('Status').should('be.visible')
     cy.contains('Mahasiswa').should('be.visible')
     cy.contains('Total Kelompok').should('be.visible')
     cy.contains('Kelompok Aktif').should('be.visible')
     cy.contains('Kelompok Nonaktif').should('be.visible')
 
-    // Info sanksi di header profil
     cy.contains('Terkena Sanksi').should('be.visible')
 
-    // Riwayat kelompok: ada kelompok aktif & nonaktif
     cy.contains('Riwayat Kelompok').should('be.visible')
     cy.contains(KELOMPOK_AKTIF).should('be.visible')
     cy.contains(KELOMPOK_NONAKTIF).should('be.visible')
@@ -74,28 +69,26 @@ describe('TC-PUB-001 — Portal Publik Praktikan', () => {
     cy.get('input[placeholder*="NIM"]').type(`${NIM}{enter}`)
     cy.contains(NAMA).click()
 
-    // Buka detail kelompok aktif — telusuri kartunya sampai ketemu tombol Lihat Detail
+    // "Lihat Detail" tidak unik — bertolak dari judul kartu kelompoknya
     cy.contains('h3', KELOMPOK_AKTIF)
       .parents('div')
       .contains('button', 'Lihat Detail')
       .click()
 
     cy.url().should('include', '/praktikan/')
-    cy.url().should('match', /\/[A-Za-z0-9_-]+$/) // ada id kelompok di akhir URL
+    cy.url().should('match', /\/[A-Za-z0-9_-]+$/) // id kelompok di akhir URL
 
-    // Info header kelompok
     cy.get('h1').should('contain', NAMA)
     cy.contains('Kelompok:').should('be.visible')
     cy.contains('Kelompok:').parent().should('contain', KELOMPOK_AKTIF)
     cy.contains('Kelas:').should('be.visible')
     cy.contains('Konsultan:').should('be.visible')
 
-    // Ringkasan Presensi: ada Materi & Demo
     cy.contains('Ringkasan Presensi').should('be.visible')
     cy.contains('Materi').should('be.visible')
     cy.contains('Demo').should('be.visible')
 
-    // Daftar Modul — pakai h3 biar gak nyasar ke elemen tersembunyi
+    // Pakai h3 biar tidak nyangkut elemen tersembunyi
     cy.contains('Daftar Modul').should('be.visible')
     cy.contains('h3', 'PROJECT INITIATION & JIRA SETUP').should('be.visible')
     cy.contains('h3', 'COST ESTIMATION & PRODUCT BACKLOG').should('be.visible')
@@ -111,22 +104,19 @@ describe('TC-PUB-001 — Portal Publik Praktikan', () => {
       .contains('button', 'Lihat Detail')
       .click()
 
-    // Klik Modul 1 untuk lihat penilaiannya
     cy.contains('h3', 'PROJECT INITIATION & JIRA SETUP').click()
 
-    // Bagian Penilaian
+    // Nilai akhir bukan elemen sendiri — ada di dalam elemen induk
     cy.contains('h4', 'Penilaian').should('be.visible')
     cy.contains('Nilai Akhir:').should('be.visible')
     cy.contains('Nilai Akhir:').parent().should('contain', 'B+')
 
-    // Komponen nilai per kategori
     cy.contains('Individual - Consultation').should('be.visible')
     cy.contains('Individual - Role Defense').should('be.visible')
     cy.contains('Document Quality - Business Case').should('be.visible')
     cy.contains('Document Quality - Charter').should('be.visible')
     cy.contains('Technical Setup - Jira Config').should('be.visible')
 
-    // Feedback & Catatan
     cy.contains('h4', 'Feedback & Catatan').should('be.visible')
     cy.contains('Feedback Individu').should('be.visible')
     cy.contains('Feedback Kelompok').should('be.visible')
@@ -137,10 +127,8 @@ describe('TC-PUB-001 — Portal Publik Praktikan', () => {
 
     cy.get('h1').contains('Daftar Sanksi Praktikum').should('be.visible')
 
-    // Cari NIM di kolom pencarian sanksi
     cy.get('input[placeholder*="Cari NIM"]').type(`${NIM}{enter}`)
 
-    // Hasil filter: 1 kasus sanksi untuk NIM ini
     cy.get('body').should('contain', NIM)
     cy.get('body').should('contain', NAMA)
     cy.contains('1 kasus tercatat').should('be.visible')

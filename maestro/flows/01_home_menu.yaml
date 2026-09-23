@@ -9,7 +9,7 @@
 # PRASYARAT
 #   - Emulator Android menyala (cek: adb devices)
 #   - Aplikasi MiLab2 sudah terpasang. Build dulu dari source-nya:
-#       cd D:\AI\MiLab\my_lab
+#       cd <folder-source-milab2>
 #       flutter build apk --debug
 #     lalu install APK hasil build:
 #       adb install -r build\app\outputs\flutter-apk\app-debug.apk
@@ -34,14 +34,14 @@ name: "TC-APP-001 Jelajah Menu Utama MiLab2"
 tags:
   - smoke
 ---
-# Mulai dari kondisi bersih, biar hasilnya sama setiap kali dijalankan
+# Kondisi bersih biar hasilnya sama setiap run
 - launchApp:
     clearState: true
 
 # ---------- 1. Halaman Home ----------
-# PENTING: tunggu Home benar-benar tampil sebelum menyentuh apa pun.
-# `tapOn` tidak menunggu aplikasi selesai loading. Kalau langsung tap
-# setelah launchApp, tap-nya mendarat di splash screen dan flow gagal.
+# Tunggu Home benar-benar tampil sebelum menyentuh apa pun: `tapOn` tidak
+# menunggu aplikasi selesai loading. Kalau langsung tap sesudah launchApp,
+# tap-nya mendarat di splash screen dan flow gagal.
 - assertVisible: "Hi, Faizallll"
 - assertVisible: "Menu Utama"
 - assertVisible: "My Class"
@@ -50,17 +50,16 @@ tags:
 - assertVisible: "Other Services"
 
 # ---------- 2. Our Product ----------
-# Ikon "View All" tidak punya teks, jadi ditap pakai identifier yang
-# sudah dipasang di source code (Semantics(identifier: 'home_view_all')).
+# Ikon "View All" tidak punya teks, jadi ditap pakai identifier dari source
+# code (Semantics(identifier: 'home_view_all')).
 - tapOn:
     id: "home_view_all"
 - assertVisible: "Our Product"
 
-# Teks kartu produk digabung Flutter jadi satu string, jadi pakai regex
+# Teks kartu produk digabung Flutter jadi satu string — pakai regex
 - assertVisible: ".*SIMUTU Lab.*"
 - tapOn: ".*SIMUTU Lab.*"
 
-# Detail produk
 - assertVisible: ".*About This Service.*"
 - assertVisible: "24/7"
 - scroll
@@ -100,23 +99,19 @@ tags:
 - assertVisible: "Download Task"
 - tapOn: ".*Pemrograman Mobile E.*"
 
-# Daftar modul yang bisa diunduh
 - assertVisible: ".*Course Materials.*"
 - assertVisible: "6 Modules Available"
 - assertVisible: ".*Module 1.*"
 - tapOn: ".*Module 1.*"
 
-# Isi modul 1
 - assertVisible: ".*Module 1 Files.*"
 - assertVisible: ".*Module Guide.*"
 - assertVisible: ".*Practice Files.*"
 - assertVisible: ".*Additional Resources.*"
 
-# Proses download salah satu berkas
 - tapOn: ".*Practice Files.*"
 - assertVisible: ".*Downloading Files for Module 1.*"
 
-# Kembali ke Home
 - back
 - back
 - assertVisible: "Hi, Faizallll"

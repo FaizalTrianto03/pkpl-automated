@@ -15,45 +15,35 @@
 #   Semua langkah berstatus ✅.
 #
 # CARA JALANKAN
-#   & "C:\maestro\maestro\bin\maestro.bat" test maestro\flows\00_cek_koneksi.yaml
+#   maestro test maestro\flows\00_cek_koneksi.yaml
 #
-# Kalau flow ini GAGAL, jangan lanjut ke flow aplikasi dulu —
-# yang bermasalah adalah setup emulator/Maestro, bukan aplikasinya.
+# Kalau flow ini GAGAL, jangan lanjut ke flow aplikasi — yang bermasalah
+# adalah setup emulator/Maestro, bukan aplikasinya.
 # ============================================================
 
 appId: com.android.settings
 name: "TC-APP-000 Cek Koneksi Maestro ke Emulator"
 ---
-# Reset dulu biar selalu mulai dari kondisi yang sama
+# Reset biar selalu mulai dari kondisi yang sama
 - launchApp:
     clearState: true
 
-# Halaman utama Settings tampil
 - assertVisible: "Settings"
 - assertVisible: "Network & internet"
 
-# Masuk ke halaman Network & internet
 - tapOn: "Network & internet"
 
-# Cek menu khas halaman ini.
-# CATATAN: judul halaman di Android kadang tidak masuk ke UI hierarchy,
-# jadi yang dicek isi halamannya (Internet, SIMs), bukan judulnya.
+# Judul halaman di Android kadang tidak masuk UI hierarchy, jadi yang dicek
+# isi halamannya (Internet, SIMs), bukan judulnya.
 - assertVisible: "Internet"
 - assertVisible: "SIMs"
 
-# Balik ke halaman utama
 - back
 
 # ---------- BERSIH-BERSIH ----------
-# PENTING: tutup aplikasi Settings di akhir flow.
-#
-# Kalau Settings dibiarkan terbuka, kadang Android memunculkan dialog
-# sistem "Application Not Responding" (ANR) untuk proses Settings yang
-# masih hidup. Dialog itu MENGAMBIL ALIH FOKUS LAYAR, sehingga flow
-# berikutnya (TC-APP-001) gagal di langkah pertama karena Home MiLab2
-# tidak pernah terlihat.
-#
-# `stopApp` mematikan proses Settings, `pressKey: Home` memastikan
-# layar kembali ke launcher. Dengan ini tiap flow selalu mulai bersih.
+# Tutup Settings di akhir flow. Kalau dibiarkan hidup, Android kadang
+# memunculkan dialog "Application Not Responding" (ANR) untuk proses Settings,
+# dan dialog itu MENGAMBIL ALIH FOKUS LAYAR — flow berikutnya (TC-APP-001)
+# gagal di langkah pertama karena Home MiLab2 tidak pernah terlihat.
 - stopApp
 - pressKey: Home

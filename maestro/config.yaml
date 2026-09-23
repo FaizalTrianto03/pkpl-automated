@@ -1,11 +1,8 @@
 # ============================================================
 # Konfigurasi Maestro — project automated (PKPL 2026)
 #
-# appId default: aplikasi yang dipakai untuk contoh flow.
-#   MiLab2 = aplikasi Flutter contoh yang jadi SUT (System Under Test).
-#
-# flows: daftar file/folder yang dijalankan kalau kita pakai
-#   `maestro test maestro/config.yaml`.
+# appId: aplikasi default untuk contoh flow (MiLab2, Flutter).
+# flows: file/folder yang dijalankan oleh `maestro test maestro/config.yaml`.
 # ============================================================
 
 appId: com.example.Milab2
@@ -13,6 +10,6 @@ appId: com.example.Milab2
 flows:
   - "flows/**"
 
-# Folder hasil run: screenshot + laporan tiap test case.
-# Berguna sebagai bukti pengujian saat laporan praktikum.
+# Hasil run: screenshot + laporan per test case, dipakai sebagai bukti
+# pengujian di laporan praktikum.
 testOutputDir: output
